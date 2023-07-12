@@ -14,7 +14,7 @@ tuningDegrees = zeros(size,1);
 firingRates = zeros(8,size);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    ESTIMATION BASED ON DATA %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-radyan = [0;pi/4;pi/2;3*pi/4;pi;5*pi/4;3*pi/2;7*pi/4];
+radian = [0;pi/4;pi/2;3*pi/4;pi;5*pi/4;3*pi/2;7*pi/4];
 degree = [0;45;90;135;180;225;270;315];
 
 for j=neuronIndexStart+1:length(unit) % neuronNum
@@ -40,9 +40,9 @@ for j=neuronIndexStart+1:length(unit) % neuronNum
     
     
     %   cosStr = 'p(1) + p(2) * cos ( theta - p(3) )';
-    [beta,R,J,CovB,MSE,ErrorModelInfo] = nlinfit(radyan, firingRates(:,neuronIndex), cosFun, [1 1 0] ); %Least squares curve fit to inline function "cosFun"
-    yFit = cosFun(beta,radyan);
-    tuningDegrees(neuronIndex) = radyan(find(yFit==max(yFit))).*(180/pi); % Preferred direction in Radyan
+    [beta,R,J,CovB,MSE,ErrorModelInfo] = nlinfit(radian, firingRates(:,neuronIndex), cosFun, [1 1 0] ); %Least squares curve fit to inline function "cosFun"
+    yFit = cosFun(beta,radian);
+    tuningDegrees(neuronIndex) = radian(find(yFit==max(yFit))).*(180/pi); % Preferred direction in Radyan
            
 end
 
@@ -101,16 +101,16 @@ function [x,y] = initCircle(center, radius)
     grid on;
 end
 
-function [x2,y2] = vectorOnCircle(radius, radyan, magnitude)
+function [x2,y2] = vectorOnCircle(radius, radian, magnitude)
     
-    x1 = radius * cos(radyan);
-    y1 = radius * sin(radyan);
+    x1 = radius * cos(radian);
+    y1 = radius * sin(radian);
         
     spread = rand(1)*2;
     
     for i=1:length(magnitude)    
-        x2 = (magnitude(i)+radius) * cos(radyan);
-        y2 = (magnitude(i)+radius) * sin(radyan); 
+        x2 = (magnitude(i)+radius) * cos(radian);
+        y2 = (magnitude(i)+radius) * sin(radian); 
             
         if x2<0
             x2 = x2-spread;

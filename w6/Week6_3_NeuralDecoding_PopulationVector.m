@@ -1,4 +1,4 @@
-%clear all
+clear all
 close all
 clc
 load('Chapter16_CenterOutTest.mat')
@@ -10,17 +10,17 @@ size = neuronIndexEnd-neuronIndexStart;
 cosStr = 'p(1) + p(2) * cos ( theta - p(3) )'; %Cosine function in string form
 cosFun = inline(cosStr,'p','theta'); %Converts string to a function
 
-tuningDegrees = zeros(size,1);
+tuningDirections = zeros(size,1);
 firingRates = zeros(8,size);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    ESTIMATION BASED ON DATA %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 radian = [0;pi/4;pi/2;3*pi/4;pi;5*pi/4;3*pi/2;7*pi/4];
-degree = [0;45;90;135;180;225;270;315];
+%degree = [0;45;90;135;180;225;270;315];
 
 for j=neuronIndexStart+1:length(unit) % neuronNum
     neuronIndex = j-neuronIndexStart;    
         
-    for i=1:8   % For every ANGLE
+    for i=1:8   % For every direction
         angleTrials = find(direction==i); % For every degree, find its trial indexes
         instTimes = instruction(angleTrials);    
         spikeCount = 0;
@@ -42,7 +42,7 @@ for j=neuronIndexStart+1:length(unit) % neuronNum
     %   cosStr = 'p(1) + p(2) * cos ( theta - p(3) )';
     [beta,R,J,CovB,MSE,ErrorModelInfo] = nlinfit(radian, firingRates(:,neuronIndex), cosFun, [1 1 0] ); %Least squares curve fit to inline function "cosFun"
     yFit = cosFun(beta,radian);
-    tuningDegrees(neuronIndex) = radian(find(yFit==max(yFit))).*(180/pi); % Preferred direction in Radyan
+    tuningDirections(neuronIndex) = radian(find(yFit==max(yFit))); % Preferred direction in Radyan
            
 end
 
@@ -51,7 +51,7 @@ end
 h = figure('name','Direction Estimation');
 set(h,'OuterPosition',[50,50,900,700]);
 radius = 5;
-upLimit = 20;
+upLimit = 30;
 
 initCircle([0 0], radius);
 xlim([-upLimit upLimit]);
@@ -63,8 +63,8 @@ popVectorY = 0;
 
 % Population Vector
 for n=1:neuronIndex
-    preferredDir = tuningDegrees(n).*pi/180;
-    ind = find (degree == tuningDegrees(n));
+    preferredDir = tuningDirections(n);
+    ind = find (radian == tuningDirections(n));
     w = firingRates(ind,n);    
       
     x = cos(preferredDir) * w;
@@ -107,21 +107,24 @@ function [x2,y2] = vectorOnCircle(radius, radian, magnitude)
     y1 = radius * sin(radian);
         
     spread = rand(1)*2;
-    
-    for i=1:length(magnitude)    
-        x2 = (magnitude(i)+radius) * cos(radian);
-        y2 = (magnitude(i)+radius) * sin(radian); 
-            
-        if x2<0
-            x2 = x2-spread;
-        end
-        if y2<0
-            y2 = y2-spread;
-        end        
-        plot([x1 x2], [y1 y2], 'Color',[rand(1),rand(1),rand(1)], 'LineWidth',2);
-        a=6;
+        
+    x2 = (magnitude+radius) * cos(radian);
+    y2 = (magnitude+radius) * sin(radian); 
+
+    jitter = rand(1);
+     
+    if x2<0
+        x2 = x2-jitter;
+    else
+        x2 = x2+jitter;
     end
-    
+    if y2<0
+        y2 = y2-jitter;
+    else
+        y2 = y2+jitter;
+    end        
+    plot([x1 x2], [y1 y2], 'Color',[rand(1),rand(1),rand(1)], 'LineWidth',2);
+        
     axis square;
     grid on;
 end
